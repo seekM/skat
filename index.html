@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<link rel="stylesheet" type="text/css" href="style.css"/>
+</head>
+<body>
+
+<div id="container"></div>
+
+<script src="independentFunctions.js"></script> 
+
+<script>
+function print(string)
+{
+	var textDiv = document.createElement("div");
+	textDiv.textContent = string;
+	
+	containerElement.appendChild(textDiv); 
+}
+
+function showCard(cardName)
+{
+	var imgDiv = document.createElement("img");
+	imgDiv.setAttribute("src","images/" + cardName + ".svg");
+	
+	containerElement.appendChild(imgDiv); 
+}
+
+function printNewLine()
+{
+	containerElement.appendChild(document.createElement('br'));
+}
+
+async function printCountdown(string, startingNumber)
+{
+	print(string);
+		
+	for (var i = startingNumber; i > 0; i--) 
+	{
+		print(i);
+		
+		await sleep(1000);
+		
+		removeLastPrinted();
+	}
+}
+
+function printArguments()
+{
+		print("numberOfPlayers: " + numberOfPlayers);
+		print("secondsAfterCard: " + secondsAfterCard);
+		
+		if(numberOfPlayers==2)
+		{
+			print("secondsAfterStich: " + secondsAfterStich);
+		}
+		
+		printNewLine();
+}
+
+function removeLastPrinted()
+{
+	containerElement.removeChild(containerElement.lastChild)
+}
+
+function clearScreen()
+{
+	containerElement.textContent = "";
+}
+
+function checkAndDocumentInvalidArguments()
+{
+	var allArgumentsAreValid = true;
+
+	if(!isNumber(numberOfPlayers))
+	{
+		print("The value for numberOfPlayers has to be a number");
+		
+		allArgumentsAreValid = false;
+	}
+	else
+	{
+		if(!isNumberOfPlayersValid(numberOfPlayers))
+		{
+			print("The value for numberOfPlayers has to be 1 or 2");
+			
+			allArgumentsAreValid = false;
+		}
+		else if(numberOfPlayers==2)
+		{
+			if(!isIntervalInSecondsValid(secondsAfterStich))
+			{
+				print("The value for secondsAfterStich has to be >=0.5 and <10");
+				
+				allArgumentsAreValid = false;
+			}
+		}
+	}
+
+	if(!isNumber(secondsAfterCard))
+	{
+		print("The value for secondsAfterCard has to be a number");
+		
+		allArgumentsAreValid = false;
+	}
+	else
+	{
+		if(!isIntervalInSecondsValid(secondsAfterCard))
+		{
+			print("The value for secondsAfterCard has to be >=1 and <10");
+			
+			allArgumentsAreValid = false;
+		}
+	}
+	
+	return allArgumentsAreValid
+}
+
+async function startOnePlayerGame()
+{
+	for (var i = 0; i < cards.length; i++) 
+	{
+		showCard(cards[i]);
+		
+		await sleep(secondsAfterCard*1000);
+		
+		clearScreen();
+	}
+}
+
+async function startTwoPlayerGame()
+{
+	var pointsPlayer1 = 0;
+	var pointsPlayer2 = 0;
+
+	for (var i = 0; i < cards.length; i++) 
+	{
+		showCard(cards[i]);
+	
+		await sleep(secondsAfterCard*1000);
+
+		if((i+1)%3 == 0)
+		{
+			clearScreen();
+			
+			if(coinFlip())
+			{
+				print("Player 1");
+				
+				pointsPlayer1 += getValueOfCard(cards[i]);
+				pointsPlayer1 += getValueOfCard(cards[i-1]);
+				pointsPlayer1 += getValueOfCard(cards[i-2]);
+			}
+			else
+			{
+				print("Player 2");
+				
+				pointsPlayer2 += getValueOfCard(cards[i]);
+				pointsPlayer2 += getValueOfCard(cards[i-1]);
+				pointsPlayer2 += getValueOfCard(cards[i-2]);
+			}
+
+			await sleep(secondsAfterStich*1000);
+			
+			clearScreen();
+		}
+		if(i == (cards.length-1))
+		{	
+			print("Skat");
+			
+			await sleep(secondsAfterStich*1000);
+			
+			clearScreen();
+		}
+	}
+	
+	print("Player1: " + pointsPlayer1); 
+	print("Player2: " + pointsPlayer2); 
+	print("Skat: " + (120-pointsPlayer1-pointsPlayer2)); 
+	printNewLine();
+	
+	await printCountdown("Refreshing in...", 15);
+	
+	clearScreen();
+}
+
+async function startGame()
+{
+	while(true)
+	{
+	  clearScreen();
+		
+		printArguments();
+
+		await printCountdown("Starting in...", 10);
+		
+	  clearScreen();
+				
+		shuffle(cards);
+		
+		await sleep(500);
+		
+		if(numberOfPlayers==1)
+		{
+			await startOnePlayerGame();
+		}
+		else if(numberOfPlayers==2)
+		{
+			await startTwoPlayerGame();
+		}
+		else
+		{
+			alert("This should not happen")
+		}
+	}	
+}
+
+var numberOfPlayers = getGETParameter('numberOfPlayers');
+var secondsAfterCard = getGETParameter('secondsAfterCard');
+var secondsAfterStich = getGETParameter('secondsAfterStich');
+
+var containerElement = document.getElementById("container");
+
+var values = ["ace","7","8","9","10","jack","queen","king"];
+var suits = ["club","diamond","heart","spade"];
+var cards = cartesianProduct(values,suits);
+	
+var allArgumentsAreValid = checkAndDocumentInvalidArguments();
+
+if(allArgumentsAreValid)
+{	
+	startGame();
+}
+</script>
+
+</body>
+</html>
