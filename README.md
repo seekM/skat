@@ -14,5 +14,5 @@
     + `secondsAfterStich`: >= 0.5 und < 10
 
 ## Examples
-+ https://seekm.github.io/skat/index.html?numberOfPlayers=1&secondsAfterCard=1.5
-+ https://seekm.github.io/skat/index.html?numberOfPlayers=2&secondsAfterCard=1.5&secondsAfterStich=2
++ https://seekm.github.io/skat/index.html?numberOfPlayers=1&secondsAfterCard=0.8
++ https://seekm.github.io/skat/index.html?numberOfPlayers=2&secondsAfterCard=0.8&secondsAfterStich=2
